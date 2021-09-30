@@ -3,88 +3,62 @@ import cv2
 import numpy as np
 import torchvision.transforms as transforms
 from torch.utils.data import Dataset
-from sklearn.model_selection import train_test_split
 
 class ImageDataset(Dataset):
-    def __init__(self, csv, train_sz):
+    def __init__(self, csv, train, test, train_sz = 0.85):
         self.csv = csv
+        self.train = train
+        self.test = test
         self.all_image_names = self.csv[:]['Id']
-        self.labels = np.array(self.csv.drop(['Id', 'Genre'], axis=1))
-        # split the data into train and validation sets
-        X_train, X_val, y_train, y_val = train_test_split(
-            self.all_image_names, self.labels, test_size= (1-train_sz), random_state=17)
-        
-        print(f"Number of training images: {int(train_sz * len(self.csv))}")
+        self.all_labels = np.array(self.csv.drop(['Id', 'Genre'], axis=1))
+        self.train_ratio = int(train_sz * len(self.csv))
+        self.valid_ratio = len(self.csv) - self.train_ratio
         # set the training data images and labels
-        self.train_images = list(X_train) 
-        self.train_labels = list(y_train) 
-        # define the training transforms
-        self.train_transform = transforms.Compose([
-            transforms.ToPILImage(),
-            transforms.Resize((400, 400)),
-            transforms.RandomHorizontalFlip(p=0.5),
-            transforms.RandomRotation(degrees=45),
-            transforms.ToTensor(),
-        ])
-        
-        print(f"Number of validation images: {len(self.csv) - (int(train_sz * len(self.csv)))}")
+        if self.train == True:
+            print(f"Number of training images: {self.train_ratio}")
+            self.image_names = list(self.all_image_names[:self.train_ratio])
+            self.labels = list(self.all_labels[:self.train_ratio])
+            # define the training transforms
+            self.transform = transforms.Compose([
+                transforms.ToPILImage(),
+                transforms.Resize((400, 400)),
+                transforms.RandomHorizontalFlip(p=0.5),
+                transforms.RandomRotation(degrees=45),
+                transforms.ToTensor(),
+            ])
         # set the validation data images and labels
-        self.val_images = list(X_val)
-        self.val_labels = list(y_val) 
-        # define the validation transforms
-        self.val_transform = transforms.Compose([
-            transforms.ToPILImage(),
-            transforms.Resize((400, 400)),
-            transforms.ToTensor(),
-        ])
-        
+        elif self.train == False and self.test == False:
+            print(f"Number of validation images: {self.valid_ratio}")
+            self.image_names = list(self.all_image_names[-self.valid_ratio:-10])
+            self.labels = list(self.all_labels[-self.valid_ratio:])
+            # define the validation transforms
+            self.transform = transforms.Compose([
+                transforms.ToPILImage(),
+                transforms.Resize((400, 400)),
+                transforms.ToTensor(),
+            ])
         # set the test data images and labels, only last 10 images
-        self.test_images = list(X_val[-10:])
-        self.tets_labels = list(y_val[-10:])
-        # define the test transforms
-        self.test_transform = transforms.Compose([
-            transforms.ToPILImage(),
-            transforms.ToTensor(),
-        ])
-    
+        # this, we will use in a separate inference script
+        elif self.test == True and self.train == False:
+            self.image_names = list(self.all_image_names[-10:])
+            self.labels = list(self.all_labels[-10:])
+             # define the test transforms
+            self.transform = transforms.Compose([
+                transforms.ToPILImage(),
+                transforms.ToTensor(),
+            ])
     def __len__(self):
-        out = [len(self.train_images), len(self.val_images), len(self.test_images)]
-        return out
+        return len(self.image_names)
     
-    def __gettrain__(self, index):
-        image = cv2.imread(f"../data/Images/{self.train_images[index]}.jpg")
+    def __getitem__(self, index):
+        image = cv2.imread(f"../data/Images/{self.image_names[index]}.jpg")
         # convert the image from BGR to RGB color format
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         # apply image transforms
-        image = self.train_transform(image)
-        targets = self.train_labels[index]
-
-        return {
-            'image': torch.tensor(image, dtype=torch.float32),
-            'label': torch.tensor(targets, dtype=torch.float32)
-        }
-
-    def __getval__(self, index):
-        image = cv2.imread(f"../data/Images/{self.val_images[index]}.jpg")
-        # convert the image from BGR to RGB color format
-        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        # apply image transforms
-        image = self.val_transform(image)
-        targets = self.val_labels[index]
-
-        return {
-            'image': torch.tensor(image, dtype=torch.float32),
-            'label': torch.tensor(targets, dtype=torch.float32)
-        }    
-
-    def __gettest__(self, index):
-        image = cv2.imread(f"../data/Images/{self.test_images[index]}.jpg")
-        # convert the image from BGR to RGB color format
-        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        # apply image transforms
-        image = self.test_transform(image)
-        targets = self.test_labels[index]
-
+        image = self.transform(image)
+        print(f"../data/Images/{self.image_names[index]}.jpg")
+        targets = self.labels[index]
+        
         return {
             'image': torch.tensor(image, dtype=torch.float32),
             'label': torch.tensor(targets, dtype=torch.float32)

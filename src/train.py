@@ -1,4 +1,4 @@
-import models
+import model_engine
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -14,7 +14,7 @@ matplotlib.style.use('ggplot')
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 #intialize the model
-model = models.model(pretrained=True, requires_grad=False).to(device)
+model = model_engine.model(pretrained=True, requires_grad=False).to(device)
 # learning parameters
 lr = 0.0001
 epochs = 20
@@ -23,13 +23,16 @@ optimizer = optim.Adam(model.parameters(), lr=lr)
 criterion = nn.BCELoss()
 
 # read the training csv file
-train_csv = pd.read_csv('../data/preproc_res/prep_train0.csv')
+train_csv = pd.read_csv('../data/preproc_res/prep_train4.csv')
 
-im_ds = ImageDataset(train_csv, 0.85)
 # train dataset
-#train_data = 
+train_data = ImageDataset(
+    train_csv, train=True, test=False
+)
 # validation dataset
-#valid_data = 
+valid_data = ImageDataset(
+    train_csv, train=False, test=False
+)
 # train data loader
 train_loader = DataLoader(
     train_data, 
@@ -42,7 +45,6 @@ valid_loader = DataLoader(
     batch_size=batch_size,
     shuffle=False
 )
-
 # start the training and validation
 train_loss = []
 valid_loss = []
@@ -58,7 +60,6 @@ for epoch in range(epochs):
     valid_loss.append(valid_epoch_loss)
     print(f"Train Loss: {train_epoch_loss:.4f}")
     print(f'Val Loss: {valid_epoch_loss:.4f}')
-
 # save the trained model to disk
 torch.save({
             'epoch': epochs,

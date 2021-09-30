@@ -80,7 +80,7 @@ def save_train(df):
     i = 0
     while os.path.exists("../data/preproc_res/prep_train%s.csv" % i):
         i += 1
-    df.to_csv("../data/preproc_res/prep_train%s.csv" % i, sep='\t')
+    df.to_csv("../data/preproc_res/prep_train%s.csv" % i, sep = ",", index=False)
     print("Dataframe saved like: {}".format("../data/preproc_res/prep_train%s.csv" % i))
 
 def start(df):
@@ -120,3 +120,6 @@ def start(df):
             print("Input error, try again")
     
     return df
+
+df = pd.read_csv('../data/train.csv')
+start(df)

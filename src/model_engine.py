@@ -3,7 +3,7 @@ from torchvision import models as models
 import torch.nn as nn
 from tqdm import tqdm
 
-def model(pretrained, requires_grad, num_class):
+def model(pretrained, requires_grad, num_class = 23):
     model = models.resnet50(progress=True, pretrained=pretrained)
     # to freeze the hidden layers
     if requires_grad == False:

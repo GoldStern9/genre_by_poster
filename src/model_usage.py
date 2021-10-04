@@ -100,5 +100,5 @@ def predict_by_test(data_path, model_path):
         plt.savefig(f"../visualisation/test_genres_vis/predictions_{counter}.jpg")
         plt.show()
 
-print(predict_by_sample("../models/model.pth", "../data/23.jpg"))
+#print(predict_by_sample("../models/model.pth", "../data/Images/tt3957716.jpg"))
 #predict_by_test('../data/preproc_res/prep_train4.csv',"../models/model.pth")

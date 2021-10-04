@@ -56,7 +56,7 @@ class ImageDataset(Dataset):
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         # apply image transforms
         image = self.transform(image)
-        print(f"../data/Images/{self.image_names[index]}.jpg")
+        #print(f"../data/Images/{self.image_names[index]}.jpg")
         targets = self.labels[index]
         
         return {

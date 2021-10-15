@@ -14,7 +14,7 @@ genres = ['Action', 'Adventure', 'Animation', 'Biography',
        'Sci-Fi', 'Short', 'Sport', 'Thriller', 'War', 'Western']
 
 
-def predict_by_sample(model_path, img_path):
+def predict_by_sample(model_path, img_path, th = 0.3):
     # initialize the computation device
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     #intialize the model
@@ -42,15 +42,17 @@ def predict_by_sample(model_path, img_path):
     outputs = model(image[None, ...])
     outputs = torch.sigmoid(outputs)
     outputs = outputs.detach().cpu()
-    sorted_indices = np.argsort(outputs[0])
-    top3 = sorted_indices[-3:]
+    outputs = list(map(lambda x: x if x >= th else 0, outputs[0]))
+    sorted_indices = np.argsort(outputs)
+    top_count = sum(list(map(lambda x: x != 0, outputs)))
+    topn = sorted_indices[-top_count:]
     string_predicted = ''
-    for i in range(len(top3)):
-        string_predicted += f"{genres[top3[i]]}    "
+    for i in range(len(topn)):
+        string_predicted += f"{genres[topn[i]]}    "
     return string_predicted
          
 
-def predict_by_test(data_path, model_path):
+def predict_by_test(data_path, model_path, th = 0.3):
     # initialize the computation device
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     #intialize the model
@@ -84,11 +86,13 @@ def predict_by_test(data_path, model_path):
         outputs = model(image)
         outputs = torch.sigmoid(outputs)
         outputs = outputs.detach().cpu()
-        sorted_indices = np.argsort(outputs[0])
-        top3 = sorted_indices[-3:]
+        outputs = list(map(lambda x: x if x >= th else 0, outputs[0]))
+        sorted_indices = np.argsort(outputs)
+        top_count = sum(list(map(lambda x: x != 0, outputs)))
+        topn = sorted_indices[-top_count:]
         string_predicted, string_actual = '', ''
-        for i in range(len(top3)):
-            string_predicted += f"{genres[top3[i]]}    "
+        for i in range(len(topn)):
+            string_predicted += f"{genres[topn[i]]}    "
         for i in range(len(target_indices)):
             string_actual += f"{genres[target_indices[i]]}    "
         image = image.squeeze(0)
@@ -101,4 +105,4 @@ def predict_by_test(data_path, model_path):
         plt.show()
 
 #print(predict_by_sample("../models/model.pth", "../data/Images/tt3957716.jpg"))
-#predict_by_test('../data/preproc_res/prep_train4.csv',"../models/model.pth")
+predict_by_test('../data/preproc_res/prep_train4.csv',"../models/model.pth", 0.3)

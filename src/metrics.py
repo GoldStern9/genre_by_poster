@@ -112,7 +112,7 @@ checkpoint = torch.load('../models/model.pth')
 # load model weights state_dict
 model.load_state_dict(checkpoint['model_state_dict'])
 
-accur = check_accuracy(valid_loader, model, device, 0.3, valid_data)
-p = check_precision(valid_loader, model, device, 0.3, valid_data)
-r = check_recall(valid_loader, model, device, 0.3, valid_data)
-f1 = check_f1(valid_loader, model, device, 0.3, valid_data, p, r)
+#accur = check_accuracy(valid_loader, model, device, 0.3, valid_data)
+p = check_precision(valid_loader, model, device, 0.5, valid_data)
+r = check_recall(valid_loader, model, device, 0.5, valid_data)
+f1 = check_f1(valid_loader, model, device, 0.5, valid_data, p, r)

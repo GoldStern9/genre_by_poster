@@ -21,8 +21,8 @@
   - **model_usage.py**: предсказание по одному или группе постеров
   - **set_data.py**: класс, описывающий датасет
   - **train.py**: обучение модели
+  - **metrics.py**: метрики
 - **visualisation**: как есть, визуализация и несколько предсказаний  
-****
 ### Распределение данных:
 ![Распределение](https://github.com/GoldStern9/genre_by_poster/raw/main/visualisation/genre_distr_bar.png)
 ### Loss по эпохе:
